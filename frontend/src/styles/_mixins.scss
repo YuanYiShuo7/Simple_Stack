@@ -1,0 +1,73 @@
+// 响应式断点 mixin
+@mixin respond-to($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    @media (min-width: map-get($breakpoints, $breakpoint)) {
+      @content;
+    }
+  } @else {
+    @warn "Unfortunately, no value could be retrieved from `#{$breakpoint}`. "
+        + "Available breakpoints are: #{map-keys($breakpoints)}.";
+  }
+}
+
+// 主题颜色应用 mixin
+@mixin theme-colors($map: $theme-colors) {
+  @each $key, $color in $map {
+    --color-#{$key}: #{$color};
+  }
+}
+
+// 按钮样式 mixin
+@mixin button-variant($background, $color: $text-light) {
+  background-color: $background;
+  color: $color;
+  border: 1px solid $background; // 直接使用原色或稍作调整
+  
+  &:hover, &:focus {
+    filter: brightness(0.9); // 使用滤镜变暗替代 darken
+  }
+  
+  &:active {
+    filter: brightness(0.8);
+  }
+}
+
+// 卡片样式 mixin
+@mixin card($background: $background-color, $shadow: $box-shadow) {
+  background: $background;
+  border-radius: $border-radius;
+  box-shadow: $shadow;
+  padding: $spacing-unit;
+  transition: all $transition-duration $transition-timing;
+  
+  &:hover {
+    box-shadow: $box-shadow-hover;
+    transform: translateY(-2px);
+  }
+}
+
+// 文本截断 mixin
+@mixin text-truncate($lines: 1) {
+  @if $lines == 1 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+// 动画 mixin
+@mixin animate($name, $duration: 1s, $timing: ease, $delay: 0s, $iteration: 1, $direction: normal) {
+  animation: {
+    name: $name;
+    duration: $duration;
+    timing-function: $timing;
+    delay: $delay;
+    iteration-count: $iteration;
+    direction: $direction;
+  }
+}

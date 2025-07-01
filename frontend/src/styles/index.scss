@@ -1,0 +1,187 @@
+// 导入变量和混合
+@import 'variables';
+@import 'mixins';
+
+// 重置和基础样式
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: $text-color;
+  background-color: $background-color;
+  transition: background-color $transition-duration $transition-timing;
+}
+
+// 主题应用
+:root {
+  @include theme-colors();
+}
+
+// 排版
+h1, h2, h3, h4, h5, h6 {
+  color: $primary-color;
+  margin-bottom: $spacing-small;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1rem; }
+
+p {
+  margin-bottom: $spacing-unit;
+}
+
+a {
+  color: $primary-color;
+  text-decoration: none;
+  transition: color $transition-duration $transition-timing;
+  
+  &:hover {
+    color: darken($primary-color, 15%);
+  }
+}
+
+// 按钮样式
+.btn {
+  display: inline-block;
+  padding: $spacing-small $spacing-unit;
+  border-radius: $border-radius;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: all $transition-duration $transition-timing;
+  
+  &-primary {
+    @include button-variant($primary-color, $text-light);
+  }
+  
+  &-secondary {
+    @include button-variant($secondary-color, $text-color);
+  }
+  
+  &-outline {
+    background-color: transparent;
+    border: 2px solid $primary-color;
+    color: $primary-color;
+    
+    &:hover {
+      background-color: $primary-color;
+      color: $text-light;
+    }
+  }
+}
+
+// 卡片样式
+.card {
+  @include card();
+  
+  &-header {
+    padding-bottom: $spacing-small;
+    border-bottom: 1px solid $border-color;
+    margin-bottom: $spacing-unit;
+  }
+  
+  &-title {
+    color: $primary-color;
+  }
+}
+
+// 导航栏
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-unit;
+  background-color: $primary-color;
+  color: $text-light;
+  box-shadow: $box-shadow;
+  
+  &-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  
+  &-nav {
+    display: flex;
+    list-style: none;
+    
+    .nav-item {
+      margin-left: $spacing-unit;
+      
+      .nav-link {
+        color: $text-light;
+        padding: $spacing-small 0;
+        position: relative;
+        
+        &:hover {
+          opacity: 0.9;
+        }
+        
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 0;
+          height: 2px;
+          background-color: $text-light;
+          transition: width $transition-duration $transition-timing;
+        }
+        
+        &:hover::after {
+          width: 100%;
+        }
+      }
+    }
+  }
+}
+
+// 实用工具类
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 $spacing-unit;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.mt-1 { margin-top: $spacing-small; }
+.mt-2 { margin-top: $spacing-unit; }
+.mt-3 { margin-top: $spacing-medium; }
+.mt-4 { margin-top: $spacing-large; }
+
+// 响应式调整
+@media (max-width: $breakpoint-md) {
+  .navbar {
+    flex-direction: column;
+    
+    &-nav {
+      margin-top: $spacing-unit;
+      
+      .nav-item {
+        margin: 0 $spacing-small;
+      }
+    }
+  }
+  
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.75rem; }
+}
