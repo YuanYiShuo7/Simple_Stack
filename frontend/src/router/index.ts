@@ -42,10 +42,11 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // 检查用户角色权限
-  if (to.meta.roles && !to.meta.roles.some(role => userStore.userRoles.includes(role))) {
+  if (to.meta.roles && !userStore.userRoles.includes('admin')) {
     next('/403'); // 假设有403页面
     return;
   }
+
 
   next();
 });

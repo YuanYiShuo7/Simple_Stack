@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/myapp
+      - JWT_SECRET=your_jwt_secret
+    volumes:
+      - ./backend/uploads:/usr/src/app/uploads
+    depends_on:
+      - mongo
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo:5.0
+    volumes:
+      - mongodb-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: mypassword
+    networks:
+      - app-network
+
+volumes:
+  mongodb-data:
+
+networks:
+  app-network:
+    driver: bridge

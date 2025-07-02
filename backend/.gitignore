@@ -1,0 +1,52 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# dotenv environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor-specific
+.vscode/
+.idea/
+
+# Build outputs
+dist/
+build/
+
+# Coverage reports
+coverage/
+
+# Optional: TypeScript or Babel
+*.tsbuildinfo
+
+# Optional: PM2 logs (if using pm2)
+pids/
+*.pid
+*.seed
+
+# Optional: uploads or temporary storage (if applicable)
+uploads/
+temp/
+tmp/
+
+# Optional: lock files (if using a single package manager)
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+# keep pnpm-lock.yaml only if you're using pnpm
+# otherwise uncomment the line below to ignore it
+# pnpm-lock.yaml

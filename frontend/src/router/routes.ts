@@ -37,7 +37,7 @@ const routes = [
     component: () => import('@/views/dashboard/index.vue'),
     meta: {
       requiresAuth: true,
-      roles: ['admin', 'editor']
+      roles: ['admin']
     }
   },
     {

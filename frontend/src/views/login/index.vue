@@ -73,7 +73,7 @@ const handleSubmit = async () => {
       router.push(decodeURIComponent(redirect as string));
     } else {
       // 根据角色跳转到不同页面
-      if (userRoles.includes('admin') || userRoles.includes('editor')) {
+      if (userRoles.includes('admin')) {
         router.push('/dashboard');
       } else {
         router.push('/');
