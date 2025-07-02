@@ -1,51 +1,64 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { useThemeStore } from '@/stores/theme';
 
-const themes = [
-  { name: 'Yellow', primary: '#ffd700', secondary: '#ffdf40', accent: '#ffc000' },
-  { name: 'Blue', primary: '#2196F3', secondary: '#64B5F6', accent: '#1976D2' },
-  { name: 'Green', primary: '#4CAF50', secondary: '#81C784', accent: '#2E7D32' },
-  { name: 'Purple', primary: '#9C27B0', secondary: '#BA68C8', accent: '#7B1FA2' }
-];
+const themeStore = useThemeStore();
 
-const currentTheme = ref(0);
-
-const switchTheme = () => {
-  currentTheme.value = (currentTheme.value + 1) % themes.length;
-  const theme = themes[currentTheme.value];
-  
-  document.documentElement.style.setProperty('--color-primary', theme.primary);
-  document.documentElement.style.setProperty('--color-secondary', theme.secondary);
-  document.documentElement.style.setProperty('--color-accent', theme.accent);
-};
+defineProps({
+  class: {
+    type: String,
+    default: ''
+  },
+  position: {
+    type: String,
+    default: 'fixed', // 'fixed' | 'relative'
+    validator: (value: string) => ['fixed', 'relative'].includes(value)
+  }
+});
 </script>
 
 <template>
-  <button class="theme-toggle" @click="switchTheme">
-    {{ themes[currentTheme].name }} Theme
+  <button 
+    class="theme-toggle"
+    :class="position"
+    @click="themeStore.switchTheme"
+  >
+    {{ themeStore.themes[themeStore.currentThemeIndex].name }} Theme
   </button>
 </template>
 
 <style scoped lang="scss">
-@import '@/styles/variables';
+@import '@/styles/index';
 
 .theme-toggle {
-  position: fixed;
-  top: 1rem;
-  right: 1rem;
-  padding: 0.5rem 1rem;
-  background-color: var(--color-primary);
-  color: $text-light;
-  border: none;
+  padding: $spacing-small $spacing-unit;
   border-radius: $border-radius;
   cursor: pointer;
-  font-weight: 600;
-  z-index: 1000;
   transition: all $transition-duration $transition-timing;
+  border: none;
+  font-weight: 600;
+  background-color: var(--color-primary);
+  color: $text-light;
   
   &:hover {
     background-color: var(--color-accent);
     transform: translateY(-2px);
+    box-shadow: $box-shadow-hover;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &.fixed {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+  }
+
+  &.relative {
+    position: relative;
+    display: inline-block;
   }
 }
 </style>

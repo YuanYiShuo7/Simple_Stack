@@ -34,7 +34,7 @@ const handleSubmit = async () => {
   try {
     // 1. 调用登录API
     const loginRes = await reqLogin({
-      username: form.value.email,
+      email: form.value.email,
       password: form.value.password
     });
 
@@ -97,7 +97,7 @@ if (localStorage.getItem('rememberedEmail')) {
 
 <template>
   <div class="login-container">
-    <ThemeToggle />
+    <ThemeToggle class="fixed-mode"/>
     
     <div class="login-card">
 
@@ -164,7 +164,6 @@ if (localStorage.getItem('rememberedEmail')) {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
   padding: $spacing-unit;
   background-color: $background-alt;
 }

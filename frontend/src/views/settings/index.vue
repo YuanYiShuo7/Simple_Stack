@@ -1,12 +1,12 @@
 <template>
-  <div class="home-container">
+  <div class="settings-container">
     <AppHeader 
       :user-name="userStore.userInfo?.username || 'User'"
       :avatar="userStore.userInfo?.avatar || ''"
       @open-profile="showProfileCard = true"
     />
     
-    <main class="home-main">
+    <main class="settings-main">
       <AppSidebar 
         :nav-items="navItems"
         :active-nav="activeNav"
@@ -14,9 +14,24 @@
       />
       
       <div class="content-area">
-        <div class="construction-card">
-          <h3>Under Construction</h3>
-          <p>This section is currently being developed.</p>
+        <div class="settings-card">
+          <h3 class="settings-title">Settings</h3>
+          
+          <div class="settings-section">
+            <h4>Appearance</h4>
+            <div class="settings-item">
+              <ThemeToggle position="relative"/>
+            </div>
+          </div>
+          
+          <div class="settings-section">
+            <h4>Account</h4>
+            <div class="settings-item">
+              <button class="logout-button" @click="handleLogout">
+                Logout
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </main>
@@ -33,15 +48,17 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import AppHeader from '@/components/AppHeader.vue';
 import AppSidebar from '@/components/AppSidebar.vue';
 import ProfileCard from '@/components/ProfileCard.vue';
-import { reqUpdateAvatar } from '@/api/user';
+import ThemeToggle from '@/components/ThemeToggle.vue';
 import { showToast } from '@/utils/feedback';
 
+const router = useRouter();
 const userStore = useUserStore();
-const activeNav = ref('/');
+const activeNav = ref('/settings');
 const showProfileCard = ref(false);
 
 const navItems = [
@@ -49,7 +66,7 @@ const navItems = [
   { path: '/settings', name: 'Settings', icon: 'set' }
 ];
 
-async function updateUsername(data:{username: string}) {
+const updateUsername = async (data: { username: string }) => {
   try {
     await userStore.updateUserInfo(data);
     showProfileCard.value = false;
@@ -57,9 +74,9 @@ async function updateUsername(data:{username: string}) {
     console.error('Failed to update user:', error);
     showToast('Failed to update user information', 'error');
   }
-}
+};
 
-async function updateAvatar(file: File) {
+const updateAvatar = async (file: File) => {
   try {
     const formData = new FormData();
     formData.append('avatar', file);
@@ -70,14 +87,24 @@ async function updateAvatar(file: File) {
     console.error('Avatar upload failed:', error);
     showToast('Failed to upload avatar', 'error');
   }
-}
+};
 
+const handleLogout = async () => {
+  try {
+    await userStore.logout();
+    showToast('Logged out successfully', 'success');
+    router.push('/login');
+  } catch (error) {
+    console.error('Logout failed:', error);
+    showToast('Logout failed', 'error');
+  }
+};
 </script>
 
 <style scoped lang="scss">
 @import '@/styles/index';
 
-.home-container {
+.settings-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -87,7 +114,7 @@ async function updateAvatar(file: File) {
   overflow: hidden;
 }
 
-.home-main {
+.settings-main {
   display: flex;
   flex: 1;
   width: 100%;
@@ -99,30 +126,64 @@ async function updateAvatar(file: File) {
   margin-left: 250px;
   padding: $spacing-unit;
   min-height: calc(100vh - 48px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+}
 
-  .construction-card {
-    @include card;
-    text-align: center;
-    padding: $spacing-large;
-    width: 100%;
-    max-width: 500px;
+.settings-card {
+  @include card;
+  padding: $spacing-large;
+  text-align: left;
+  max-width: 800px;
+}
 
-    h3 {
-      color: var(--color-primary);
-      margin-bottom: $spacing-small;
-    }
+.settings-title {
+  color: var(--color-primary);
+  margin-bottom: $spacing-large;
+  font-size: 1.5rem;
+  border-bottom: 1px solid $border-color;
+  padding-bottom: $spacing-small;
+}
 
-    p {
-      color: $text-muted;
-    }
+.settings-section {
+  margin-bottom: $spacing-large;
+  
+  h4 {
+    color: $text-color;
+    margin-bottom: $spacing-unit;
+    font-weight: 600;
+    font-size: 1.1rem;
   }
 }
 
+.settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-unit 0;
+  border-bottom: 1px solid $border-color;
+  
+  span {
+    color: $text-color;
+  }
+}
+
+.logout-button {
+  @include button-variant(var(--color-primary), $text-light);
+  padding: $spacing-small $spacing-medium;
+  
+  &:hover {
+    background-color: var(--color-accent);
+    transform: translateY(-2px);
+    box-shadow: $box-shadow-hover;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+
 @media (max-width: $breakpoint-md) {
-  .home-main {
+  .settings-main {
     flex-direction: column;
     margin-top: 48px;
   }

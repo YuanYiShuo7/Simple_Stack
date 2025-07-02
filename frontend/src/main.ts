@@ -9,6 +9,7 @@ import ElementPlus from 'element-plus';
 import 'element-plus/dist/index.css';
 import * as ElementPlusIconsVue from '@element-plus/icons-vue';
 import { useUserStore } from '@/stores/user';
+import { useThemeStore } from '@/stores/theme';
 
 const app = createApp(App);
 
@@ -21,6 +22,8 @@ app.use(ElementPlus);
 app.use(globalComponents);
 
 const userStore = useUserStore();
+const themeStore = useThemeStore();
+
 userStore.initUser();
 
 app.mount('#app');

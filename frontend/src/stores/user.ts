@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { reqLogout } from '@/api/user/index';
+import { reqLogout, reqUpdateUsername, reqUpdateAvatar } from '@/api/user/index';
 
 interface UserState {
   token: string;
@@ -12,11 +12,20 @@ interface UserState {
   } | null;
 }
 
+const defaultUserInfo = {
+      id: '114514',
+      username: 'User',
+      avatar: 'src/assets/imgs/default.png',
+      email: 'user@example.com',
+      roles: [],
+};
+
 export const useUserStore = defineStore('user', {
   state: (): UserState => ({
     token: '',
-    userInfo: null
+    userInfo:defaultUserInfo,
   }),
+
   actions: {
     setUserInfo(payload: { token: string; userInfo: any }) {
       this.token = payload.token;
@@ -24,6 +33,7 @@ export const useUserStore = defineStore('user', {
       // 存储token到localStorage
       localStorage.setItem('token', payload.token);
     },
+
     async logout() {
       try {
         await reqLogout();
@@ -32,18 +42,47 @@ export const useUserStore = defineStore('user', {
         localStorage.removeItem('token');
       }
     },
+
     resetUserInfo() {
       this.token = '';
-      this.userInfo = null;
+      this.userInfo = defaultUserInfo;
     },
-    // 初始化用户状态
+
     initUser() {
       const token = localStorage.getItem('token');
       if (token) {
         this.token = token;
-        // 这里可以添加自动获取用户信息的逻辑
       }
-    }
+    },
+
+    async updateUsername(data:{username: string}) {
+      try {
+        const res = await reqUpdateUsername(data);
+        if (this.userInfo) {
+          this.userInfo.username = res.data.username;
+        }
+        return res.data.username;
+      } catch (error) {
+        console.error('Failed to update username:', error);
+        throw error;
+      }
+    },
+
+    async updateAvatar(file: File) {
+      try {
+        const formData = new FormData();
+        formData.append('avatar', file);
+        
+        const res = await reqUpdateAvatar(formData);
+        if (this.userInfo) {
+          this.userInfo.avatar = res.data.avatarUrl;
+        }
+        return res.data.avatarUrl;
+      } catch (error) {
+        console.error('Avatar upload failed:', error);
+        throw error;
+      }
+    },
   },
   getters: {
     isLoggedIn: (state) => !!state.token,

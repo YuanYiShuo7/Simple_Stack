@@ -8,6 +8,22 @@ const routes = [
     }
   },
   {
+    path: '/register',
+    name: 'register',
+    component: () => import('@/views/register/index.vue'),
+    meta: {
+      requiresGuest: true
+    }
+  },
+    {
+    path: '/forgot-password',
+    name: 'forgot-password',
+    component: () => import('@/views/forgot-password/index.vue'),
+    meta: {
+      requiresGuest: true
+    }
+  },
+  {
     path: '/',
     name: 'home',
     component: () => import('@/views/home/index.vue'),
@@ -22,6 +38,14 @@ const routes = [
     meta: {
       requiresAuth: true,
       roles: ['admin', 'editor']
+    }
+  },
+    {
+    path: '/settings',
+    name: 'settings',
+    component: () => import('@/views/settings/index.vue'),
+    meta: {
+      requiresAuth: true
     }
   },
   {

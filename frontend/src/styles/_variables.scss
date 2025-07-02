@@ -30,18 +30,26 @@ $box-shadow-hover: 0 4px 15px rgba($black, 0.15) !default;
 // 间距
 $spacing-unit: 1rem !default;
 $spacing-small: $spacing-unit * 0.5 !default;
-$spacing-medium: $spacing-unit * 1.5 !default;
-$spacing-large: $spacing-unit * 3 !default;
+$spacing-medium: $spacing-unit * 1 !default;
+$spacing-large: $spacing-unit * 2 !default;
+
+// 边框半径
+$border-radius: 4px;
+$border-radius-lg: 8px;
+
+// 过渡效果
+$transition-duration: 0.3s;
+$transition-timing: ease;
+
+// 阴影
+$box-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+$box-shadow-lg: 0 4px 6px rgba(0, 0, 0, 0.1);
 
 // 响应式断点
 $breakpoint-sm: 576px !default;
 $breakpoint-md: 768px !default;
 $breakpoint-lg: 992px !default;
 $breakpoint-xl: 1200px !default;
-
-// 过渡
-$transition-duration: 0.3s !default;
-$transition-timing: ease-in-out !default;
 
 // 主题映射 - 便于主题切换
 $theme-colors: (

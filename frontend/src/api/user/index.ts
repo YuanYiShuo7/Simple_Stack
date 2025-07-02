@@ -5,9 +5,13 @@ const API = {
     USER_INFO_URL: '/user/info',
     LOGOUT_URL: '/user/logout',
     REGISTER_URL: '/user/register',
+    SEND_CODE_URL: '/user/send-code',
+    RESET_PASSWORD_URL: '/user/reset-password',
+    UPDATE_USERNAME_URL: '/user/update-username',
+    UPDATE_AVATAR_URL: '/user/avatar',
 } as const;
 
-export const reqLogin = (data: { username: string; password: string }) => {
+export const reqLogin = (data: { email: string; password: string }) => {
     return request.post<any>(API.LOGIN_URL, data);
 }
 
@@ -21,4 +25,30 @@ export const reqLogout = () => {
 
 export const reqRegister = (data: { username: string; password: string; email: string }) => {
     return request.post<any>(API.REGISTER_URL, data);
+}
+
+export const reqSendVerificationCode = (data: { email: string }) => {
+    return request.post<any>(API.SEND_CODE_URL, data);
+}
+
+export const reqResetPassword = (data: { 
+  email: string; 
+  code: string; 
+  newPassword: string 
+}) => {
+    return request.post<any>(API.RESET_PASSWORD_URL, data);
+}
+
+export const reqUpdateUsername = (data: { 
+  username: string; 
+}) => {
+    return request.put<any>(API.UPDATE_USERNAME_URL, data);
+}
+
+export const reqUpdateAvatar = (formData: FormData) => {
+    return request.post<{ avatarUrl: string }>(API.UPDATE_AVATAR_URL, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data'
+        }
+    });
 }
