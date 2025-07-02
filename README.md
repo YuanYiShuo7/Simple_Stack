@@ -12,11 +12,11 @@
 ```bash
 git clone https://github.com/your-username/your-repo.git
 cd your-repo
-
+```
 2. 启动服务:
 ```bash
 docker-compose up --build
-
+```
 3. 访问应用：
 -前端：http://localhost
 -后端API：http://localhost:5000
@@ -24,3 +24,4 @@ docker-compose up --build
 4. 停止服务：
 ```bash
 docker-compose down
+```

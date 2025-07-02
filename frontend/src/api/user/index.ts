@@ -46,7 +46,7 @@ export const reqUpdateUsername = (data: {
 }
 
 export const reqUpdateAvatar = (formData: FormData) => {
-    return request.post<{ avatarUrl: string }>(API.UPDATE_AVATAR_URL, formData, {
+    return request.put<{ avatarUrl: string }>(API.UPDATE_AVATAR_URL, formData, {
         headers: {
             'Content-Type': 'multipart/form-data'
         }

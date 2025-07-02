@@ -45,7 +45,6 @@ tmp/
 
 # Optional: lock files (if using a single package manager)
 package-lock.json
-pnpm-lock.yaml
 yarn.lock
 # keep pnpm-lock.yaml only if you're using pnpm
 # otherwise uncomment the line below to ignore it

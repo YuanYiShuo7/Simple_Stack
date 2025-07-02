@@ -30,7 +30,6 @@ export const useUserStore = defineStore('user', {
     setUserInfo(payload: { token: string; userInfo: any }) {
       this.token = payload.token;
       this.userInfo = payload.userInfo;
-      // 存储token到localStorage
       localStorage.setItem('token', payload.token);
     },
 
