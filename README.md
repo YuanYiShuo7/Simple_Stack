@@ -18,8 +18,8 @@ cd your-repo
 docker-compose up --build
 ```
 3. 访问应用：
--前端：http://localhost
--后端API：http://localhost:5000
+- 前端：http://localhost
+- 后端API：http://localhost:5000
 
 4. 停止服务：
 ```bash
