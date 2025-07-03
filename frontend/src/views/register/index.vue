@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { reqRegister, reqSendVerificationCode } from '@/api/user/index';
+import { reqRegister, reqSendRegisterVerificationCode } from '@/api/user/index';
 import { showToast } from '@/utils/feedback';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 
@@ -30,7 +30,7 @@ const sendVerificationCode = async () => {
   if (countdown.value > 0) return;
 
   try {
-    await reqSendVerificationCode({ email: form.value.email });
+    await reqSendRegisterVerificationCode({ email: form.value.email });
     showToast('Verification code sent', 'success');
     startCountdown();
   } catch (error) {
@@ -65,6 +65,12 @@ const handleSubmit = async () => {
     return;
   }
 
+  if (form.value.verificationCode.length !== 6) {
+    errorMessage.value = 'Verification code must be 6 digits';
+    showToast('Verification code must be 6 digits', 'error');
+    return;
+  }
+
   isLoading.value = true;
   errorMessage.value = '';
 
@@ -72,7 +78,8 @@ const handleSubmit = async () => {
     const registerRes = await reqRegister({
       username: form.value.username,
       password: form.value.password,
-      email: form.value.email
+      email: form.value.email,
+      verificationCode: form.value.verificationCode
     });
 
     if (registerRes.code !== 200) {

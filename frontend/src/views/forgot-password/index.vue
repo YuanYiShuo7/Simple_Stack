@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { reqResetPassword, reqSendVerificationCode } from '@/api/user/index';
+import { reqResetPassword, reqSendResetPasswordVerificationCode } from '@/api/user/index';
 import { showToast } from '@/utils/feedback';
 import ThemeToggle from '@/components/ThemeToggle.vue';
 
@@ -30,7 +30,7 @@ const sendVerificationCode = async () => {
   if (countdown.value > 0) return;
 
   try {
-    await reqSendVerificationCode({ email: form.value.email });
+    await reqSendResetPasswordVerificationCode({ email: form.value.email });
     showToast('Verification code sent', 'success');
     activeStep.value = 2;
     startCountdown();

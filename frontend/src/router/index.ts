@@ -1,8 +1,9 @@
-import {createRouter, createWebHistory} from 'vue-router'
+// src/router/index.ts
+import { createRouter, createWebHistory, RouteLocationNormalized } from 'vue-router'
 import routes from './routes'
 import { useUserStore } from '@/stores/user';
 
-let router = createRouter({
+const router = createRouter({
     history: createWebHistory(),
     routes: routes,
     scrollBehavior(to, from, savedPosition) {
@@ -14,41 +15,42 @@ let router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-
-   if (import.meta.env.DEV) {
-    next();
-    return;
-  }
-
-  const userStore = useUserStore();
-  const isLoggedIn = userStore.isLoggedIn;
-  
-  // 初始化用户状态
-  if (!isLoggedIn && localStorage.getItem('token')) {
-    try {
-      await userStore.initUser();
-    } catch (error) {
-      localStorage.removeItem('token');
+    // Skip auth checks in development for easier testing
+    if (import.meta.env.DEV) {
+        next();
+        return;
     }
-  }
 
-  // 检查是否需要登录
-  if (to.meta.requiresAuth && !userStore.isLoggedIn) {
-    next({
-      path: '/login',
-      query: { redirect: to.fullPath }
-    });
-    return;
-  }
+    const userStore = useUserStore();
+    
+    // Initialize user state if token exists
+    if (!userStore.isLoggedIn && localStorage.getItem('token')) {
+        try {
+            await userStore.initUser();
+        } catch (error) {
+            console.error('Failed to initialize user:', error);
+            localStorage.removeItem('token');
+            next('/login');
+            return;
+        }
+    }
 
-  // 检查用户角色权限
-  if (to.meta.roles && !userStore.userRoles.includes('admin')) {
-    next('/403'); // 假设有403页面
-    return;
-  }
+    // Check if route requires authentication
+    if (to.meta.requiresAuth && !userStore.isLoggedIn) {
+        next({
+            path: '/login',
+            query: { redirect: to.fullPath }
+        });
+        return;
+    }
 
+    // Check if user has required role
+    if (to.meta.requiredRole && to.meta.requiredRole !== userStore.userInfo?.role) {
+        next('/403');
+        return;
+    }
 
-  next();
+    next();
 });
 
 export default router

@@ -1,5 +1,5 @@
 # 构建阶段
-FROM node:latest as build-stage
+FROM node:latest AS build-stage
 WORKDIR /app
 
 RUN npm install pnpm -g

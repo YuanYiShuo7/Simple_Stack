@@ -17,7 +17,7 @@ const defaultUserInfo = {
       id: '114514',
       username: 'User',
       avatar: 'src/assets/imgs/default.png',
-      email: 'user@example.com',
+      email: '',
       role: 'user',
 };
 
@@ -86,6 +86,6 @@ export const useUserStore = defineStore('user', {
   },
   getters: {
     isLoggedIn: (state) => !!state.token,
-    userRoles: (state) => state.userInfo?.roles || []
+    userRole: (state) => state.userInfo?.role || 'user'
   }
 });

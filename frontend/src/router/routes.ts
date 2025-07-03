@@ -25,6 +25,10 @@ const routes = [
         }
     },
     {
+    path: '/',
+    redirect: '/login'
+    },
+    {
         path: '/user',
         name: 'user-root',
         component: () => import('@/views/user/root/index.vue'),
@@ -37,6 +41,11 @@ const routes = [
                 path: 'settings',
                 name: 'user-settings',
                 component: () => import('@/views/user/user-settings/index.vue')
+            },
+            {
+              path: 'home', // /user/home
+              name: 'user-home',
+              component: () => import('@/views/user/user-home/index.vue')
             },
             // Add more user routes here
         ]

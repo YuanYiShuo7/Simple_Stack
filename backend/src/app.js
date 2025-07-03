@@ -20,9 +20,30 @@ app.use('/avatars', express.static(path.join(__dirname, '../uploads/avatars')));
 
 app.use('/user', userRoutes);
 
+app.get('/', (req, res) => {
+    res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Express 默认页面</title>
+            <style>
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+                h1 { color: #333; }
+            </style>
+        </head>
+        <body>
+            <h1>欢迎来到 Express 后端服务！</h1>
+            <p>这是默认页面。</p>
+            <p>当前时间：${new Date().toLocaleString()}</p>
+        </body>
+        </html>
+    `);
+});
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
 });
+
 
 export default app;

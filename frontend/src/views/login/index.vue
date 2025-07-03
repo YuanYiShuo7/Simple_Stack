@@ -74,7 +74,7 @@ const handleSubmit = async () => {
     } else {
       // 根据角色跳转到不同页面
       if (userrole == 'user') {
-        router.push('/user');
+        router.push('/user/home');
       } else if(userrole == 'admin')
       {
         ;

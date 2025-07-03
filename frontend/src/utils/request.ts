@@ -48,12 +48,10 @@ request.interceptors.request.use(
 
 // 添加响应拦截器（完整示例通常需要）
 request.interceptors.response.use(
-  (response) => {
-    // 对响应数据做处理
-    return response.data;
-  },
+  (response) => response.data,
   (error) => {
-    console.error('响应拦截器错误:', error);
+    console.error('HTTP 状态码:', error.response?.status); // 打印状态码
+    console.error('响应数据:', error.response?.data);      // 打印错误数据
     return Promise.reject(error);
   }
 );

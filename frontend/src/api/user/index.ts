@@ -5,7 +5,8 @@ const API = {
     USER_INFO_URL: '/user/info',
     LOGOUT_URL: '/user/logout',
     REGISTER_URL: '/user/register',
-    SEND_CODE_URL: '/user/send-code',
+    SEND_REGISTER_CODE_URL: '/user/send-register-code',
+    SEND_RESET_PASSWORD_CODE_URL: '/user/send-reset-password-code',
     RESET_PASSWORD_URL: '/user/reset-password',
     UPDATE_USERNAME_URL: '/user/update-username',
     UPDATE_AVATAR_URL: '/user/avatar',
@@ -23,17 +24,21 @@ export const reqLogout = () => {
     return request.post<any>(API.LOGOUT_URL);
 }
 
-export const reqRegister = (data: { username: string; password: string; email: string }) => {
+export const reqRegister = (data: { username: string; password: string; email: string; verificationCode: string  }) => {
     return request.post<any>(API.REGISTER_URL, data);
 }
 
-export const reqSendVerificationCode = (data: { email: string }) => {
-    return request.post<any>(API.SEND_CODE_URL, data);
+export const reqSendRegisterVerificationCode = (data: { email: string }) => {
+    return request.post<any>(API.SEND_REGISTER_CODE_URL, data);
+}
+
+export const reqSendResetPasswordVerificationCode = (data: { email: string }) => {
+    return request.post<any>(API.SEND_RESET_PASSWORD_CODE_URL, data);
 }
 
 export const reqResetPassword = (data: { 
   email: string; 
-  code: string; 
+  verificationCode: string; 
   newPassword: string 
 }) => {
     return request.post<any>(API.RESET_PASSWORD_URL, data);

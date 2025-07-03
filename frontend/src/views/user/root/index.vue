@@ -2,7 +2,7 @@
   <div class="user-container">
     <AppHeader 
       :user-name="userStore.userInfo?.username || 'User'"
-      :avatar="userStore.userInfo?.avatar || ''"
+      :avatar="userStore.userInfo?.avatar || 'src/assets/imgs/default.png'"
       @open-profile="showProfileCard = true"
     />
     
@@ -51,7 +51,7 @@ const activeNav = computed(() => route.path);
 
 // User-specific navigation items
 const userNavItems = computed(() => [
-  { path: '/user', name: 'Home', icon: 'home' },
+  { path: '/user/home', name: 'Home', icon: 'home' },
   { path: '/user/settings', name: 'Settings', icon: 'settings' }
   // Add more user-specific routes here
 ]);
