@@ -6,7 +6,7 @@ const props = defineProps<{
   name: string           // svg文件名，不带扩展名
   size?: string | number // 尺寸，默认1em
   color?: string         // 填充颜色，默认继承
-  class?: string         // 自定义样式类
+  iconClass?: string         // 自定义样式类
 }>()
 
 const iconComponent = computed(() => {
@@ -23,7 +23,7 @@ const style = computed(() => ({
 </script>
 
 <template>
-  <component :is="iconComponent" :style="style" :class="class" />
+  <component :is="iconComponent" :style="style" :class="iconClass" />
 </template>
 
 <style scoped>

@@ -1,23 +1,24 @@
 <template>
-  <div class="home-container">
+  <div class="user-container">
     <AppHeader 
       :user-name="userStore.userInfo?.username || 'User'"
       :avatar="userStore.userInfo?.avatar || ''"
       @open-profile="showProfileCard = true"
     />
     
-    <main class="home-main">
+    <main class="user-main">
       <AppSidebar 
-        :nav-items="navItems"
+        :nav-items="userNavItems"
         :active-nav="activeNav"
-        @nav-change="activeNav = $event"
+        @nav-change="handleNavChange"
       />
       
       <div class="content-area">
-        <div class="construction-card">
-          <h3>Under Construction</h3>
-          <p>This section is currently being developed.</p>
-        </div>
+        <router-view v-slot="{ Component }">
+          <transition name="fade" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
       </div>
     </main>
     
@@ -32,52 +33,59 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 import AppHeader from '@/components/AppHeader.vue';
 import AppSidebar from '@/components/AppSidebar.vue';
 import ProfileCard from '@/components/ProfileCard.vue';
-import { reqUpdateAvatar } from '@/api/user';
 import { showToast } from '@/utils/feedback';
 
+const router = useRouter();
+const route = useRoute();
 const userStore = useUserStore();
-const activeNav = ref('/');
 const showProfileCard = ref(false);
 
-const navItems = [
-  { path: '/', name: 'Home', icon: 'home' },
-  { path: '/settings', name: 'Settings', icon: 'set' }
-];
+// Set active nav based on current route
+const activeNav = computed(() => route.path);
 
-async function updateUsername(data:{username: string}) {
+// User-specific navigation items
+const userNavItems = computed(() => [
+  { path: '/user', name: 'Home', icon: 'home' },
+  { path: '/user/settings', name: 'Settings', icon: 'settings' }
+  // Add more user-specific routes here
+]);
+
+function handleNavChange(path: string) {
+  router.push(path);
+}
+
+async function updateUsername(data: {username: string}) {
   try {
-    await userStore.updateUserInfo(data);
+    await userStore.updateUsername(data);
     showProfileCard.value = false;
+    showToast('Username updated successfully', 'success');
   } catch (error) {
-    console.error('Failed to update user:', error);
-    showToast('Failed to update user information', 'error');
+    console.error('Failed to update username:', error);
+    showToast('Failed to update username', 'error');
   }
 }
 
 async function updateAvatar(file: File) {
   try {
-    const formData = new FormData();
-    formData.append('avatar', file);
-    const response = await reqUpdateAvatar(formData);
-
-    userStore.userInfo.avatar = response.data.avatarUrl;
+    await userStore.updateAvatar(file);
+    showToast('Avatar updated successfully', 'success');
   } catch (error) {
     console.error('Avatar upload failed:', error);
     showToast('Failed to upload avatar', 'error');
   }
 }
-
 </script>
 
 <style scoped lang="scss">
 @import '@/styles/index';
 
-.home-container {
+.user-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -87,44 +95,35 @@ async function updateAvatar(file: File) {
   overflow: hidden;
 }
 
-.home-main {
+.user-main {
   display: flex;
   flex: 1;
   width: 100%;
-  margin-top: 48px;
+  margin-top: 48px; // Adjust based on header height
 }
 
 .content-area {
   flex: 1;
-  margin-left: 250px;
+  margin-left: 250px; // Adjust based on sidebar width
   padding: $spacing-unit;
   min-height: calc(100vh - 48px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow-y: auto;
+}
 
-  .construction-card {
-    @include card;
-    text-align: center;
-    padding: $spacing-large;
-    width: 100%;
-    max-width: 500px;
+// Transition effects
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
 
-    h3 {
-      color: var(--color-primary);
-      margin-bottom: $spacing-small;
-    }
-
-    p {
-      color: $text-muted;
-    }
-  }
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 
 @media (max-width: $breakpoint-md) {
-  .home-main {
+  .user-main {
     flex-direction: column;
-    margin-top: 48px;
   }
 
   .content-area {

@@ -66,20 +66,20 @@ const handleSubmit = async () => {
     showToast('Login successful', 'success');
     
     const redirect = router.currentRoute.value.query.redirect;
-    const userRoles = userInfoRes.data.roles || []; // 假设API返回了roles数组
+    const userrole = userInfoRes.data.role || 'user';
     
     if (redirect) {
       // 如果有重定向参数，优先使用
       router.push(decodeURIComponent(redirect as string));
     } else {
       // 根据角色跳转到不同页面
-      if (userRoles.includes('admin')) {
-        router.push('/dashboard');
-      } else {
-        router.push('/');
+      if (userrole == 'user') {
+        router.push('/user');
+      } else if(userrole == 'admin')
+      {
+        ;
       }
     }
-    
   } catch (error: any) {
     errorMessage.value = error.message || 'Invalid credentials. Please try again.';
     showToast(error.message || 'Login failed', 'error');

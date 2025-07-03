@@ -1,10 +1,14 @@
 # 构建阶段
-FROM node:16-alpine as build-stage
+FROM node:latest as build-stage
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
+
+RUN npm install pnpm -g
+
 COPY . .
-RUN npm run build
+
+RUN pnpm install
+
+RUN pnpm run build
 
 # 生产阶段
 FROM nginx:stable-alpine

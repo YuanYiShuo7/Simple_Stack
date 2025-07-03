@@ -43,8 +43,8 @@ export const register = async (req, res) => {
       username,
       email,
       password: hashedPassword,
-      avatar: 'src/assets/imgs/default.png', // 默认头像
-      roles: ['user'], // 默认角色
+      avatar: 'src/assets/imgs/default.png', 
+      role: 'user', 
     });
     
     await newUser.save();

@@ -1,3 +1,4 @@
+//@/stores/user.ts
 import { defineStore } from 'pinia';
 import { reqLogout, reqUpdateUsername, reqUpdateAvatar } from '@/api/user/index';
 
@@ -8,7 +9,7 @@ interface UserState {
     username: string;
     email: string;
     avatar: string;
-    roles: string[];
+    role: string;
   } | null;
 }
 
@@ -17,7 +18,7 @@ const defaultUserInfo = {
       username: 'User',
       avatar: 'src/assets/imgs/default.png',
       email: 'user@example.com',
-      roles: ['user'],
+      role: 'user',
 };
 
 export const useUserStore = defineStore('user', {
