@@ -16,7 +16,7 @@ services:
       - "5000:5000"
     environment:
       - MONGO_URI=mongodb://mongo:27017/myapp
-      - JWT_SECRET=your_jwt_secret
+      - JWT_SECRET=eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiIsImFkbWluIjp0cnVlfQ.zrpma4yJzkhUvFO0c-EZ_Li-fw7mSBdAN9iH2Jdm8xwHvaC-3uvwcpihzv5uvr7PiAvP2A7cTRcXob1Ioad7mQ
     volumes:
       - ./backend/uploads:/usr/src/app/uploads
     depends_on:

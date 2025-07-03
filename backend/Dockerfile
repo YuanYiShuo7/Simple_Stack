@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # 安装依赖
-RUN npm install
+RUN pnpm install
 
 # 复制源代码
 COPY . .

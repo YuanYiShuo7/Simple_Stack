@@ -17,7 +17,7 @@ const defaultUserInfo = {
       username: 'User',
       avatar: 'src/assets/imgs/default.png',
       email: 'user@example.com',
-      roles: [],
+      roles: ['user'],
 };
 
 export const useUserStore = defineStore('user', {
