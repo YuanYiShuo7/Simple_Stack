@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { reqLogin, reqUserInfo } from '@/api/user/index';
+import { reqLogin } from '@/api/user/index';
 import { useUserStore } from '@/stores/user';
 import { showToast } from '@/utils/feedback';
 import ThemeToggle from '@/components/ThemeToggle.vue';
@@ -38,44 +38,33 @@ const handleSubmit = async () => {
       password: form.value.password
     });
 
-    if (loginRes.code !== 200) {
-      throw new Error(loginRes.message || 'Login failed');
-    }
-
-    // 2. 获取用户信息
-    const userInfoRes = await reqUserInfo();
-    
-    if (userInfoRes.code !== 200) {
-      throw new Error(userInfoRes.message || 'Failed to get user info');
-    }
-
-    // 3. 保存用户信息到store
     userStore.setUserInfo({
-      token: loginRes.data.token,
-      userInfo: userInfoRes.data
+      token: loginRes.token,
+      expiresIn: loginRes.expiresIn, // 服务器返回的token有效期(秒)
+      userInfo: loginRes.userInfo
     });
 
-    // 4. 记住我功能
+    console.log(loginRes.userInfo);
+
     if (form.value.remember) {
       localStorage.setItem('rememberedEmail', form.value.email);
     } else {
       localStorage.removeItem('rememberedEmail');
     }
 
-    // 5. 登录成功后跳转
     showToast('Login successful', 'success');
     
     const redirect = router.currentRoute.value.query.redirect;
-    const userrole = userInfoRes.data.role || 'user';
+    const userRole = userStore.role || 'user';
     
     if (redirect) {
       // 如果有重定向参数，优先使用
       router.push(decodeURIComponent(redirect as string));
     } else {
       // 根据角色跳转到不同页面
-      if (userrole == 'user') {
+      if (userRole == 'user') {
         router.push('/user/home');
-      } else if(userrole == 'admin')
+      } else if(userRole == 'admin')
       {
         ;
       }

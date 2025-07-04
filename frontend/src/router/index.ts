@@ -23,13 +23,13 @@ router.beforeEach(async (to, from, next) => {
 
     const userStore = useUserStore();
     
-    // Initialize user state if token exists
-    if (!userStore.isLoggedIn && localStorage.getItem('token')) {
+    // 初始化用户
+    if (!userStore.isLoggedIn && localStorage.getItem('userData')) {
         try {
             await userStore.initUser();
         } catch (error) {
             console.error('Failed to initialize user:', error);
-            localStorage.removeItem('token');
+            localStorage.removeItem('userData');
             next('/login');
             return;
         }

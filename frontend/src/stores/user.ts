@@ -1,11 +1,11 @@
 //@/stores/user.ts
 import { defineStore } from 'pinia';
-import { reqLogout, reqUpdateUsername, reqUpdateAvatar } from '@/api/user/index';
+import { reqLogout, reqUpdateUsername, reqUpdateAvatar, reqUserInfo } from '@/api/user/index';
 
 interface UserState {
   token: string;
+  expiresAt: number; // token过期时间戳
   userInfo: {
-    id: string;
     username: string;
     email: string;
     avatar: string;
@@ -14,24 +14,32 @@ interface UserState {
 }
 
 const defaultUserInfo = {
-      id: '114514',
-      username: 'User',
-      avatar: 'src/assets/imgs/default.png',
-      email: '',
-      role: 'user',
+  username: 'User',
+  avatar: '',
+  email: '',
+  role: 'user',
 };
 
 export const useUserStore = defineStore('user', {
   state: (): UserState => ({
     token: '',
-    userInfo:defaultUserInfo,
+    expiresAt: 0,
+    userInfo: defaultUserInfo,
   }),
 
   actions: {
-    setUserInfo(payload: { token: string; userInfo: any }) {
+    setUserInfo(payload: { token: string; expiresIn: number; userInfo: any }) {
+      const expiresAt = Date.now() + payload.expiresIn * 1000;
       this.token = payload.token;
+      this.expiresAt = expiresAt;
       this.userInfo = payload.userInfo;
-      localStorage.setItem('token', payload.token);
+      
+      // 存储到localStorage
+      localStorage.setItem('userData', JSON.stringify({
+        token: payload.token,
+        expiresAt,
+        userInfo: payload.userInfo
+      }));
     },
 
     async logout() {
@@ -39,27 +47,45 @@ export const useUserStore = defineStore('user', {
         await reqLogout();
       } finally {
         this.resetUserInfo();
-        localStorage.removeItem('token');
+        localStorage.removeItem('userData');
       }
     },
 
     resetUserInfo() {
       this.token = '';
+      this.expiresAt = 0;
       this.userInfo = defaultUserInfo;
     },
 
-    initUser() {
-      const token = localStorage.getItem('token');
-      if (token) {
-        this.token = token;
+    async initUser() {
+      const userDataStr = localStorage.getItem('userData');
+      if (!userDataStr) return;
+
+      const userData = JSON.parse(userDataStr);
+      
+      // 检查token是否过期
+      if (Date.now() > userData.expiresAt) {
+        localStorage.removeItem('userData');
+        return;
+      }
+
+      this.token = userData.token;
+      this.expiresAt = userData.expiresAt;
+      
+      if (userData.userInfo) {
+        this.userInfo = userData.userInfo;
+      } else {  
+        this.resetUserInfo();
+        localStorage.removeItem('userData');
       }
     },
 
-    async updateUsername(data:{username: string}) {
+    async updateUsername(data: {username: string}) {
       try {
         const res = await reqUpdateUsername(data);
         if (this.userInfo) {
           this.userInfo.username = res.data.username;
+          this.updateLocalStorageUserInfo();
         }
         return res.data.username;
       } catch (error) {
@@ -71,11 +97,12 @@ export const useUserStore = defineStore('user', {
     async updateAvatar(file: File) {
       try {
         const formData = new FormData();
-        formData.append('avatar', file);
-        
-        const res = await reqUpdateAvatar(formData);
+        formData.append('avatar', file); 
+        formData.append('email', this.userInfo?.email || ''); 
+        const res = await reqUpdateAvatar({formData: formData}); 
         if (this.userInfo) {
           this.userInfo.avatar = res.data.avatarUrl;
+          this.updateLocalStorageUserInfo();
         }
         return res.data.avatarUrl;
       } catch (error) {
@@ -83,9 +110,20 @@ export const useUserStore = defineStore('user', {
         throw error;
       }
     },
+
+    updateLocalStorageUserInfo() {
+      const userDataStr = localStorage.getItem('userData');
+      if (!userDataStr || !this.userInfo) return;
+      
+      const userData = JSON.parse(userDataStr);
+      localStorage.setItem('userData', JSON.stringify({
+        ...userData,
+        userInfo: this.userInfo
+      }));
+    }
   },
+
   getters: {
-    isLoggedIn: (state) => !!state.token,
-    userRole: (state) => state.userInfo?.role || 'user'
+    isLoggedIn: (state) => !!state.token && state.expiresAt > Date.now(),
   }
 });

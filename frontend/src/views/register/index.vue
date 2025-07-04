@@ -79,12 +79,8 @@ const handleSubmit = async () => {
       username: form.value.username,
       password: form.value.password,
       email: form.value.email,
-      verificationCode: form.value.verificationCode
+      code: form.value.verificationCode
     });
-
-    if (registerRes.code !== 200) {
-      throw new Error(registerRes.message || 'Registration failed');
-    }
 
     showToast('Registration successful', 'success');
     router.push('/login');

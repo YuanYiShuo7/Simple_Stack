@@ -29,9 +29,9 @@ export const login = async (req, res) => {
     const token = generateToken(user._id);
     
     res.status(200).json({ 
-      token,
-      user: {
-        id: user._id,
+      token: token,
+      expiresIn: 3600 * 12, // 1 hour, you can adjust this as needed
+      userInfo: {
         username: user.username,
         email: user.email,
         avatar: user.avatar,
@@ -97,11 +97,18 @@ export const register = async (req, res) => {
   try {
     const { username, email, password, code } = req.body;
     
-    // 验证输入
-    if (!username || !email || !password || !code) {
+    // 验证输入并返回具体缺失字段
+    const missingFields = [];
+    if (!username) missingFields.push('username');
+    if (!email) missingFields.push('email');
+    if (!password) missingFields.push('password');
+    if (!code) missingFields.push('code');
+
+    if (missingFields.length > 0) {
       return res.status(400).json({ 
-        message: 'All fields are required',
-        code: 'MISSING_FIELDS'
+        message: `The following fields are required: ${missingFields.join(', ')}`,
+        code: 'MISSING_FIELDS',
+        missingFields: missingFields  // 可选：单独返回缺失字段数组
       });
     }
 
@@ -151,7 +158,7 @@ export const register = async (req, res) => {
       username,
       email,
       password: hashedPassword,
-      avatar: 'src/assets/imgs/default.png',
+      avatar: '',
       role: 'user'
     });
 
@@ -161,7 +168,7 @@ export const register = async (req, res) => {
     // 生成JWT
     const token = generateToken(user._id);
 
-    res.status(201).json({
+    res.status(200).json({
       message: 'Registration successful',
       code: 'REGISTRATION_SUCCESS',
       token,
@@ -245,22 +252,6 @@ export const resetPassword = async (req, res) => {
   }
 };
 
-
-export const getUserInfo = async (req, res) => {
-  try {
-    const user = await User.findById(req.userId).select('-password -registerVerificationCode -registerVerificationExpiry');
-    
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    
-    res.status(200).json(user);
-  } catch (error) {
-    console.error('Get user info error:', error);
-    res.status(500).json({ message: 'Server error retrieving user info' });
-  }
-};
-
 export const updateUsername = async (req, res) => {
   try {
     const { username } = req.body;
@@ -288,25 +279,65 @@ export const updateUsername = async (req, res) => {
 
 export const updateAvatar = async (req, res) => {
   try {
+    // 1. 验证请求数据
     if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
+      return res.status(400).json({ 
+        message: 'No file uploaded' 
+      });
     }
 
-    const avatarUrl = `${req.protocol}://${req.get('host')}/avatars/${req.file.filename}`;
-    const user = await User.findByIdAndUpdate(
-      req.userId,
-      { avatar: avatarUrl },
-      { new: true }
-    ).select('-password -registerVerificationCode -registerVerificationExpiry');
-    
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    if (!req.body.email) {
+      // 如果文件已上传但缺少email，删除临时文件
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({ 
+        message: 'Email is required' 
+      });
     }
     
-    res.status(200).json({ avatarUrl: user.avatar });
+    // 查找用户
+    const user = await User.findOne({ email });
+    if (!user) {
+      // 删除已上传的文件
+      fs.unlinkSync(req.file.path);
+      return res.status(404).json({ 
+        message: 'User not found',
+      });
+    }
+
+    // 删除旧头像文件(如果存在)
+    if (user.avatar) {
+      const oldFilename = user.avatar.split('/').pop();
+      const oldPath = path.join('uploads/avatars', oldFilename);
+      if (fs.existsSync(oldPath)) {
+        fs.unlinkSync(oldPath);
+      }
+    }
+
+    // 生成新的头像URL
+    const avatarUrl = `${req.protocol}://${req.get('host')}/avatars/${req.file.filename}`;
+    
+    // 更新用户头像
+    const updatedUser = await User.findOneAndUpdate(
+      { email },
+      { avatar: avatarUrl },
+      { new: true }
+    ).select('-password');
+
+    res.status(200).json({
+      message: 'Avatar updated successfully',
+      avatarUrl: updatedUser.avatar,
+    });
+
   } catch (error) {
     console.error('Update avatar error:', error);
-    res.status(500).json({ message: 'Server error updating avatar' });
+    
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    
+    res.status(500).json({ 
+      message: 'Server error updating avatar',
+    });
   }
 };
 

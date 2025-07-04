@@ -46,7 +46,7 @@ request.interceptors.request.use(
   }
 );
 
-// 添加响应拦截器（完整示例通常需要）
+// 添加响应拦截器
 request.interceptors.response.use(
   (response) => response.data,
   (error) => {

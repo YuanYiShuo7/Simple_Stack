@@ -2,7 +2,6 @@ import express from 'express';
 import {
   login,
   register,
-  getUserInfo,
   updateUsername,
   updateAvatar,
   sendVerificationCode,
@@ -16,7 +15,6 @@ const router = express.Router();
 
 router.post('/login', login);
 router.post('/register', register);
-router.get('/info', authMiddleware, getUserInfo);
 router.put('/update-username', authMiddleware, updateUsername);
 router.put('/avatar', authMiddleware, upload.single('avatar'), updateAvatar);
 router.post('/send-verification-code', sendVerificationCode);

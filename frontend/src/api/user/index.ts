@@ -2,7 +2,6 @@ import request from "@/utils/request";
 
 const API = {
     LOGIN_URL: '/user/login',
-    USER_INFO_URL: '/user/info',
     LOGOUT_URL: '/user/logout',
     REGISTER_URL: '/user/register',
     SEND_VERIFICATION_CODE_URL: '/user/send-verification-code',
@@ -15,15 +14,11 @@ export const reqLogin = (data: { email: string; password: string }) => {
     return request.post<any>(API.LOGIN_URL, data);
 }
 
-export const reqUserInfo = () => {
-    return request.get<any>(API.USER_INFO_URL);
-}
-
 export const reqLogout = () => {
     return request.post<any>(API.LOGOUT_URL);
 }
 
-export const reqRegister = (data: { username: string; password: string; email: string; verificationCode: string  }) => {
+export const reqRegister = (data: { username: string; password: string; email: string; code: string  }) => {
     return request.post<any>(API.REGISTER_URL, data);
 }
 
@@ -33,7 +28,7 @@ export const reqSendVerificationCode = (data: { email: string ; type: string}) =
 
 export const reqResetPassword = (data: { 
   email: string; 
-  verificationCode: string; 
+  code: string; 
   newPassword: string 
 }) => {
     return request.post<any>(API.RESET_PASSWORD_URL, data);
@@ -45,7 +40,10 @@ export const reqUpdateUsername = (data: {
     return request.put<any>(API.UPDATE_USERNAME_URL, data);
 }
 
-export const reqUpdateAvatar = (formData: FormData) => {
+export const reqUpdateAvatar = (data: { 
+  email: string,
+  formData: FormData; 
+}) => {
     return request.put<{ avatarUrl: string }>(API.UPDATE_AVATAR_URL, formData, {
         headers: {
             'Content-Type': 'multipart/form-data'

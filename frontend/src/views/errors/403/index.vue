@@ -6,13 +6,6 @@
       <p class="description">
         You don't have permission to access this page.
       </p>
-      <div class="contact-admin" v-if="userStore.isLoggedIn">
-        <p>Please contact your administrator if you believe this is an error.</p>
-        <router-link to="/contact" class="contact-link">
-          <SvgIcon name="mail" size="14px" />
-          Contact Admin
-        </router-link>
-      </div>
       <div class="action-buttons">
         <router-link to="/" class="home-button">
           <SvgIcon name="home" size="16px" />
@@ -66,31 +59,6 @@ const goBack = () => {
     color: $text-muted;
     font-size: 1.1rem;
     margin-bottom: $spacing-large;
-  }
-
-  .contact-admin {
-    margin: $spacing-large 0;
-    padding: $spacing-unit;
-    background-color: rgba(var(--color-primary), 0.05);
-    border-radius: $border-radius;
-
-    p {
-      margin-bottom: $spacing-small;
-      color: $text-color;
-    }
-
-    .contact-link {
-      display: inline-flex;
-      align-items: center;
-      gap: $spacing-small;
-      color: var(--color-primary);
-      font-weight: 500;
-      text-decoration: none;
-
-      &:hover {
-        text-decoration: underline;
-      }
-    }
   }
 
   .action-buttons {

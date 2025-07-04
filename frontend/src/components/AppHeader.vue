@@ -5,14 +5,10 @@
         <span class="username">{{ userName }}</span>
         <div class="user-avatar">
           <img 
-            v-if="avatar" 
-            :src="avatar" 
+            :src="avatarUrl" 
             alt="User Avatar"
             class="avatar-img"
           >
-          <div v-else class="avatar-fallback">
-            {{ userInitial }}
-          </div>
         </div>
       </div>
     </div>
@@ -21,6 +17,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import defaultAvatar from '@/assets/imgs/default.png'; // 导入默认头像
 
 const props = defineProps({
   userName: {
@@ -35,8 +32,8 @@ const props = defineProps({
 
 const emit = defineEmits(['open-profile']);
 
-const userInitial = computed(() => {
-  return props.userName?.charAt(0).toUpperCase() || 'U';
+const avatarUrl = computed(() => {
+  return props.avatar || defaultAvatar;
 });
 </script>
 
@@ -86,7 +83,7 @@ const userInitial = computed(() => {
   .user-avatar {
     width: 36px;
     height: 36px;
-    border-radius: 8px; // 方边圆角
+    border-radius: 8px;
     background-color: rgba($white, 0.2);
     overflow: hidden;
 
@@ -94,18 +91,7 @@ const userInitial = computed(() => {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 8px; // 保持圆角一致
-    }
-
-    .avatar-fallback {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: $white;
-      border-radius: 8px; // 保持圆角一致
+      border-radius: 8px;
     }
   }
 }

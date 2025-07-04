@@ -2,7 +2,7 @@
   <div class="user-container">
     <AppHeader 
       :user-name="userStore.userInfo?.username || 'User'"
-      :avatar="userStore.userInfo?.avatar || 'src/assets/imgs/default.png'"
+      :avatar="userStore.userInfo?.avatar || ''"
       @open-profile="showProfileCard = true"
     />
     
