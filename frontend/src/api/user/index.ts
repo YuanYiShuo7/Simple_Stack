@@ -5,8 +5,7 @@ const API = {
     USER_INFO_URL: '/user/info',
     LOGOUT_URL: '/user/logout',
     REGISTER_URL: '/user/register',
-    SEND_REGISTER_CODE_URL: '/user/send-register-code',
-    SEND_RESET_PASSWORD_CODE_URL: '/user/send-reset-password-code',
+    SEND_VERIFICATION_CODE_URL: '/user/send-verification-code',
     RESET_PASSWORD_URL: '/user/reset-password',
     UPDATE_USERNAME_URL: '/user/update-username',
     UPDATE_AVATAR_URL: '/user/avatar',
@@ -28,12 +27,8 @@ export const reqRegister = (data: { username: string; password: string; email: s
     return request.post<any>(API.REGISTER_URL, data);
 }
 
-export const reqSendRegisterVerificationCode = (data: { email: string }) => {
-    return request.post<any>(API.SEND_REGISTER_CODE_URL, data);
-}
-
-export const reqSendResetPasswordVerificationCode = (data: { email: string }) => {
-    return request.post<any>(API.SEND_RESET_PASSWORD_CODE_URL, data);
+export const reqSendVerificationCode = (data: { email: string ; type: string}) => {
+    return request.post<any>(API.SEND_VERIFICATION_CODE_URL, data);
 }
 
 export const reqResetPassword = (data: { 

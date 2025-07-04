@@ -1,11 +1,9 @@
+//src/userController.js
 import bcrypt from 'bcryptjs';
 import User from '../models/User.js';
+import VerificationCode from '../models/VerificationCode.js';
 import { generateToken } from '../utils/jwt.js';
-
-// Helper function for verification code generation
-const generateVerificationCode = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-};
+import { generateVerificationCode } from '../utils/generateVerificationCode.js';  
 
 export const login = async (req, res) => {
   console.log('Login attempt:', req.body);
@@ -47,91 +45,206 @@ export const login = async (req, res) => {
   }
 };
 
-export const register = async (req, res) => {
-  console.log('Registration attempt:', req.body);
+export const sendVerificationCode = async (req, res) => {
   try {
-    const { username, email, password, verificationCode } = req.body;
+    const { email, type = 'register' } = req.body;
     
-    // Validate input
-    if (!username || !email || !password || !verificationCode) {
-      return res.status(400).json({ message: 'All fields are required' });
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required', code: 'EMAIL_REQUIRED' });
     }
 
-    // Verify the code
-    const tempUser = await User.findOne({ 
-      email,
-      registerVerificationCode: verificationCode,
-      registerVerificationExpiry: { $gt: new Date() }
+    // 检查邮箱是否已注册 (仅注册时检查)
+    if (type === 'register') {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(409).json({ 
+          message: 'Email already registered', 
+          code: 'EMAIL_EXISTS' 
+        });
+      }
+    }
+
+    // 生成验证码
+    const code = generateVerificationCode();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15分钟过期
+
+    // 存储验证码 (覆盖旧记录)
+    await VerificationCode.findOneAndUpdate(
+      { email, type },
+      { code, expiresAt },
+      { upsert: true, new: true }
+    );
+
+    // 开发环境打印验证码，生产环境应发送邮件
+    console.log(`[${type}] Verification code for ${email}: ${code}`);
+    
+    res.status(200).json({ 
+      message: 'Verification code sent successfully',
+      code: 'CODE_SENT',
+      expiry: expiresAt.toISOString()
+    });
+  } catch (error) {
+    console.error('Send verification code error:', error);
+    res.status(500).json({ 
+      message: 'Failed to send verification code',
+      code: 'SERVER_ERROR'
+    });
+  }
+};
+
+// 注册用户
+export const register = async (req, res) => {
+  try {
+    const { username, email, password, code } = req.body;
+    
+    // 验证输入
+    if (!username || !email || !password || !code) {
+      return res.status(400).json({ 
+        message: 'All fields are required',
+        code: 'MISSING_FIELDS'
+      });
+    }
+
+    // 验证用户名格式
+    if (username.length < 3) {
+      return res.status(400).json({
+        message: 'Username must be at least 3 characters',
+        code: 'INVALID_USERNAME'
+      });
+    }
+
+    // 验证密码强度
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: 'Password must be at least 6 characters',
+        code: 'WEAK_PASSWORD'
+      });
+    }
+
+    // 检查验证码
+    const verification = await VerificationCode.findOne({ 
+      email, 
+      code,
+      type: 'register',
+      expiresAt: { $gt: new Date() }
     });
 
-    if (!tempUser) {
-      return res.status(400).json({ message: 'Invalid or expired verification code' });
+    if (!verification) {
+      return res.status(400).json({ 
+        message: 'Invalid or expired verification code',
+        code: 'INVALID_CODE'
+      });
     }
 
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-    
-    // Create user (update the temp record)
-    tempUser.username = username;
-    tempUser.password = hashedPassword;
-    tempUser.registerVerificationCode = undefined;
-    tempUser.registerVerificationExpiry = undefined;
-    tempUser.avatar = 'src/assets/imgs/default.png';
-    tempUser.role = 'user';
-    
-    await tempUser.save();
-    
+    // 检查用户名是否已存在
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) {
+      return res.status(409).json({ 
+        message: 'Username already taken',
+        code: 'USERNAME_EXISTS'
+      });
+    }
+
+    // 创建用户
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({
+      username,
+      email,
+      password: hashedPassword,
+      avatar: 'src/assets/imgs/default.png',
+      role: 'user'
+    });
+
+    // 删除已使用的验证码
+    await VerificationCode.deleteOne({ _id: verification._id });
+
+    // 生成JWT
+    const token = generateToken(user._id);
+
     res.status(201).json({
       message: 'Registration successful',
+      code: 'REGISTRATION_SUCCESS',
+      token,
       user: {
-        id: tempUser._id,
-        username: tempUser.username,
-        email: tempUser.email
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        avatar: user.avatar,
+        role: user.role
       }
     });
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({ message: 'Server error during registration' });
+    res.status(500).json({ 
+      message: 'Server error during registration',
+      code: 'SERVER_ERROR'
+    });
   }
 };
 
-export const sendRegisterVerificationCode = async (req, res) => {
+// 重置密码
+export const resetPassword = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email, code, newPassword } = req.body;
     
-    if (!email) {
-      return res.status(400).json({ message: 'Email is required' });
+    if (!email || !code || !newPassword) {
+      return res.status(400).json({ 
+        message: 'All fields are required',
+        code: 'MISSING_FIELDS'
+      });
     }
 
-    // Check if email already registered
-    const existingUser = await User.findOne({ email });
-    if (existingUser && existingUser.password) {
-      return res.status(409).json({ message: 'Email already registered' });
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        message: 'Password must be at least 6 characters',
+        code: 'WEAK_PASSWORD'
+      });
     }
 
-    // Generate code (6 digits)
-    const verificationCode = generateVerificationCode();
-    const expiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
-    
-    // Create or update user record
-    const user = existingUser || new User({ email });
-    user.registerVerificationCode = verificationCode;
-    user.registerVerificationExpiry = expiry;
+    // 验证验证码
+    const verification = await VerificationCode.findOne({ 
+      email, 
+      code,
+      type: 'reset',
+      expiresAt: { $gt: new Date() }
+    });
+
+    if (!verification) {
+      return res.status(400).json({ 
+        message: 'Invalid or expired verification code',
+        code: 'INVALID_CODE'
+      });
+    }
+
+    // 更新密码
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ 
+        message: 'User not found',
+        code: 'USER_NOT_FOUND'
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
     await user.save();
-    
-    // In production: Send email with verificationCode
-    console.log(`Verification code for ${email}: ${verificationCode}`);
-    
+
+    // 删除已使用的验证码
+    await VerificationCode.deleteOne({ _id: verification._id });
+
     res.status(200).json({ 
-      message: 'Verification code sent',
-      expiry: expiry.toISOString()
+      message: 'Password reset successful',
+      code: 'PASSWORD_RESET_SUCCESS'
     });
   } catch (error) {
-    console.error('Verification code error:', error);
-    res.status(500).json({ message: 'Failed to send verification code' });
+    console.error('Password reset error:', error);
+    res.status(500).json({ 
+      message: 'Server error during password reset',
+      code: 'SERVER_ERROR'
+    });
   }
 };
+
 
 export const getUserInfo = async (req, res) => {
   try {
@@ -194,75 +307,6 @@ export const updateAvatar = async (req, res) => {
   } catch (error) {
     console.error('Update avatar error:', error);
     res.status(500).json({ message: 'Server error updating avatar' });
-  }
-};
-
-export const sendResetPasswordVerificationCode = async (req, res) => {
-  try {
-    const { email } = req.body;
-    
-    if (!email) {
-      return res.status(400).json({ message: 'Email is required' });
-    }
-
-    const user = await User.findOne({ email });
-    
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    
-    const resetCode = generateVerificationCode();
-    const resetCodeExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
-    
-    user.resetCode = resetCode;
-    user.resetCodeExpiry = resetCodeExpiry;
-    await user.save();
-    
-    // In production: Send email with resetCode
-    console.log(`Password reset code for ${email}: ${resetCode}`);
-    
-    res.status(200).json({ 
-      message: 'Verification code sent',
-      expiry: resetCodeExpiry.toISOString()
-    });
-  } catch (error) {
-    console.error('Password reset code error:', error);
-    res.status(500).json({ message: 'Failed to send verification code' });
-  }
-};
-
-export const resetPassword = async (req, res) => {
-  try {
-    const { email, verificationCode, newPassword } = req.body;
-    
-    if (!email || !verificationCode || !newPassword) {
-      return res.status(400).json({ message: 'All fields are required' });
-    }
-
-    if (newPassword.length < 6) {
-      return res.status(400).json({ message: 'Password must be at least 6 characters' });
-    }
-
-    const user = await User.findOne({ email });
-    
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    
-    if (user.resetCode !== verificationCode || new Date() > user.resetCodeExpiry) {
-      return res.status(400).json({ message: 'Invalid or expired verification code' });
-    }
-    
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
-    user.resetCode = null;
-    user.resetCodeExpiry = null;
-    await user.save();
-    
-    res.status(200).json({ message: 'Password reset successful' });
-  } catch (error) {
-    console.error('Password reset error:', error);
-    res.status(500).json({ message: 'Server error resetting password' });
   }
 };
 

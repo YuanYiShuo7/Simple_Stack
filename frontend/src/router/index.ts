@@ -1,5 +1,5 @@
 // src/router/index.ts
-import { createRouter, createWebHistory, RouteLocationNormalized } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import routes from './routes'
 import { useUserStore } from '@/stores/user';
 

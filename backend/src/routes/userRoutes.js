@@ -5,8 +5,7 @@ import {
   getUserInfo,
   updateUsername,
   updateAvatar,
-  sendRegisterVerificationCode,
-  sendResetPasswordVerificationCode,
+  sendVerificationCode,
   resetPassword,
   logout
 } from '../controllers/userController.js';
@@ -20,8 +19,7 @@ router.post('/register', register);
 router.get('/info', authMiddleware, getUserInfo);
 router.put('/update-username', authMiddleware, updateUsername);
 router.put('/avatar', authMiddleware, upload.single('avatar'), updateAvatar);
-router.post('/send-register-code', sendRegisterVerificationCode);
-router.post('/send-reset-password-code', sendResetPasswordVerificationCode);
+router.post('/send-verification-code', sendVerificationCode);
 router.post('/reset-password', resetPassword);
 router.post('/logout', authMiddleware, logout);
 
